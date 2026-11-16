@@ -58,6 +58,10 @@ pnpm add link:/path/to/dsh-model-importer
 
 打包成 `.tgz` 发给别人、发到 npm、或收录进插件市场，步骤见 [PUBLISH.md](PUBLISH.md)。
 
+## 文章
+
+- [给 DSH 写了个插件：三步把阿里百炼的模型导进设置页](docs/blog/juejin-dsh-model-importer.md)（掘金稿，含真机截图与实现拆解）
+
 ## 卸载
 
 ```bash
