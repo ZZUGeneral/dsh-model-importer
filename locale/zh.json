@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "模型导入器",
+    "description": "在设置 → 模型页用图形化向导连接第三方平台（阿里百炼：按量计费 / Coding Plan / Token Plan），挑选模型后写入当前 profile。"
+  }
+}
