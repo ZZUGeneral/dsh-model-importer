@@ -69,3 +69,23 @@ dsh plugin --profile <profile> add github:<owner>/<repo>
 - [ ] `README.md` 的安装段与本文不冲突
 - [ ] `npm pack --dry-run` 文件清单正确
 - [ ] 装上后刷新页面，卡片出现在 设置 → 模型 底部
+
+## 五、GitHub + Actions 自动发版
+
+仓库推上去后，在 GitHub 的 `Settings → Secrets and variables → Actions` 里加一个 `NPM_TOKEN`（就是前面那个勾了 Bypass 2FA 的 granular 令牌），之后发版只要：
+
+```sh
+npm version patch          # 或 minor / major，自动改 package.json 并打 tag
+git push --follow-tags
+```
+
+`.github/workflows/publish.yml` 会在 `v*` tag 推上去时校验「版本号 == tag」、跑语法与 locale 键集检查，然后 `npm publish`。手动触发也行（Actions 页面点 `Run workflow`）。
+
+仓库初始化（一次性）：
+
+```sh
+gh repo create dsh-model-importer --public --source=. --push
+# 或手动建空仓库后
+git remote add origin git@github.com:<你>/dsh-model-importer.git
+git push -u origin main
+```
