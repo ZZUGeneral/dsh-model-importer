@@ -1,5 +1,8 @@
 # 分享与发布
 
+> 当前状态：`dsh-model-importer@0.2.3` 已发布到 npm（维护者 `zzu-general`）。
+> 安装：`dsh plugin --profile desktop add dsh-model-importer`
+
 三种由轻到重的分享方式，按对方的使用习惯挑一种。
 
 ## 一、直接发 tarball（最快，不用账号）

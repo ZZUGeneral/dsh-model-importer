@@ -1,6 +1,6 @@
 {
   "name": "dsh-model-importer",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Graphical importer for third-party models: connects Alibaba Bailian (pay-as-you-go, Coding Plan, Token Plan) and writes the picked models into the profile.",
   "type": "module",
   "license": "MIT",

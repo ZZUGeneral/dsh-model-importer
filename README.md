@@ -28,7 +28,15 @@
 
 ## 安装
 
-在 DeepSeek Harness 的设置 → 插件页选择「安装本地插件」，指向本目录；或让 Agent 用 `plugin_manager` 的 `install_bundle` 安装（`target` 传本目录的绝对路径）。插件管理器会：
+**从 npm 安装**（已发布，[npmjs.com/package/dsh-model-importer](https://www.npmjs.com/package/dsh-model-importer)）：
+
+```sh
+dsh plugin --profile desktop add dsh-model-importer
+```
+
+或在设置 → 插件页的搜索框里填 `dsh-model-importer`。
+
+**从本地目录安装**：设置 → 插件 → 安装本地插件，指向本目录；或让 Agent 用 `plugin_manager` 的 `install_bundle` 安装（`target` 传本目录的绝对路径）。插件管理器会：
 
 1. 在 profile（`~/.dsh/profiles/desktop`）里以 `link:` 依赖这份源码；
 2. 把 `dsh-model-importer` 追加进 `package.json` 的 `dsh.profile.bundles`；
