@@ -46,6 +46,10 @@ pnpm add link:/path/to/dsh-model-importer
 
 手动改完需要重启 DeepSeek Harness 并刷新页面。
 
+## 分享
+
+打包成 `.tgz` 发给别人、发到 npm、或收录进插件市场，步骤见 [PUBLISH.md](PUBLISH.md)。
+
 ## 卸载
 
 ```bash
