@@ -1,12 +1,14 @@
 # dsh-model-importer
 
-在 DeepSeek Harness 的 **设置 → 模型** 页加入一个图形化向导：连接第三方平台，勾选要用的模型，一次写入当前 profile。首期支持 **阿里百炼（DashScope，OpenAI 兼容模式）**。
+在 DeepSeek Harness 的 **设置 → 模型** 页加入一个图形化向导：连接第三方平台，勾选要用的模型，一次写入当前 profile。目前支持 **阿里百炼（DashScope）**、**硅基流动（SiliconFlow）**、**腾讯云 TokenHub**、**火山引擎方舟（Volcano Ark）**，均为 OpenAI 兼容协议。
 
 ## 它做了什么
 
 向导在 `settings.models.footer` 槽位渲染一张卡片，点开后分两步：
 
-1. **连接平台** — 选计费方式（决定 Base URL 与 Key 类型）、粘贴 API Key、确认提供商 ID 与显示名称：
+1. **连接平台** — 先选平台，再选计费方式（决定 Base URL 与 Key 类型）、粘贴 API Key、确认提供商 ID 与显示名称：
+
+   **阿里百炼**（四种计费方式）：
 
    | 计费方式 | Provider ID | Base URL | API Key | Key 获取页 |
    | --- | --- | --- | --- | --- |
@@ -15,8 +17,28 @@
    | Token Plan 个人版 | `bailian-tpp` | `https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1` | `sk-sp-` 开头 | Token Plan 个人版页 |
    | Token Plan 团队版 | `bailian-tp` | 同上 | 团队版专属 Key | 订阅总览页 |
 
-   Provider ID 默认取表中值，已存在时自动加 `-2`、`-3` 后缀；Base URL 仍可手改。**API Key 字段右侧有「去控制台获取 API Key ↗」链接**，按当前计费方式跳到对应的控制台页面，点击后在系统浏览器打开。
-2. **挑选模型** — 调 `llm.discoverModels` 向该接入点拉取模型列表（百炼的 `GET /compatible-mode/v1/models`），可搜索、可按「仅对话模型」过滤、可全选；接口没返回列表时可以手动逐行填写模型 ID。
+   **硅基流动**：
+
+   | 计费方式 | Provider ID | Base URL | Key 获取页 |
+   | --- | --- | --- | --- |
+   | 按量计费 | `siliconflow` | `https://api.siliconflow.cn/v1` | [cloud.siliconflow.cn/account/ak](https://cloud.siliconflow.cn/account/ak) |
+
+   **腾讯云 TokenHub**：
+
+   | 计费方式 | Provider ID | Base URL | API Key | Key 获取页 |
+   | --- | --- | --- | --- | --- |
+   | 按量计费 | `tokenhub` | `https://tokenhub.tencentmaas.com/v1` | 普通 Key | [tokenhub/apikey](https://console.cloud.tencent.com/tokenhub/apikey) |
+   | Token Plan 套餐 | `tokenhub-plan` | `https://tokenhub.tencentmaas.com/plan/v3` | `sk-tp-` 开头 | [tokenhub/tokenplan](https://console.cloud.tencent.com/tokenhub/tokenplan) |
+
+   **火山引擎方舟**：
+
+   | 计费方式 | Provider ID | Base URL | Key 获取页 |
+   | --- | --- | --- | --- |
+   | 按量计费 | `ark` | `https://ark.cn-beijing.volces.com/api/v3` | [方舟 API Key 页](https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey) |
+   | Coding Plan | `ark-coding` | `https://ark.cn-beijing.volces.com/api/coding/v3` | 同上 |
+
+   Provider ID 默认取表中值，已存在时自动加 `-2`、`-3` 后缀；Base URL 仍可手改。**API Key 字段右侧有「去控制台获取 API Key ↗」链接**，按当前平台与计费方式跳到对应的控制台页面，点击后在系统浏览器打开。
+2. **挑选模型** — 调 `llm.discoverModels` 向该接入点拉取模型列表（`GET {baseURL}/models`），可搜索、可按「仅对话模型」过滤、可全选；接口没返回列表时可以手动逐行填写模型 ID。**腾讯云 Token Plan 套餐接口不提供 `/models` 列表**，此时向导自动载入内置的官方套餐模型清单（以控制台实际为准），并给出提示。
 
 保存时：
 
@@ -87,6 +109,6 @@ icon.svg
 ## 已知限制
 
 - 提供商 ID 写入后不可改名（与模型页一致）；重复保存同一个 ID 会覆盖它的同名配置，向导会提前提示。
-- 平台目前只有百炼（四种计费方式见上表）；新增平台只需在 `client.js` 的 `PLANS` 里补一项（`id`、`api`、`baseURL`，可选 `workspaceTemplate`）。
+- 目前内置四个平台（百炼 / 硅基流动 / TokenHub / 方舟）；新增平台只需在 `client.js` 的 `PLATFORMS` 里补一项（`id`、`labelKey`、`hintKey`、`plans[]`），每个 plan 给 `id`、`api`、`baseURL`、各 locale 键，可选 `workspaceTemplate` 或 `presetModels`（接口无 `/models` 列表时的内置清单）。
 - 平台没有返回容量时，模型按「高级设置」里的默认上下文窗口 / 最大输出写入（默认 131072 / 8192 token）。
 - 模型列表固定在弹窗内滚动（占屏幕高度的一半左右，约 12–15 行），上百个模型时用搜索框或「全选当前结果」配合过滤更快。

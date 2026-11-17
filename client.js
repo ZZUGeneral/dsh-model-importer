@@ -44,55 +44,158 @@ window.__ModuleLoader__.load({
     const DEFAULT_MAX_TOKENS = 8192
 
     /** Models that are clearly not chat-completions models. */
-    const NON_CHAT = /(embedding|embed-|rerank|tts|asr|speech|voice|cosyvoice|sambert|paraformer|whisper|ocr|drawing|image|video|wanx|wan2|kling|flux|stable-diffusion|text-to-image|image-to-image|sensevoice)/i
+    const NON_CHAT = /(embedding|embed-|rerank|tts|asr|speech|voice|cosyvoice|sambert|paraformer|whisper|ocr|drawing|image|video|wanx|wan2|kling|flux|stable-diffusion|text-to-image|image-to-image|sensevoice|-3d|music|pixverse)/i
 
     /**
-     * 阿里百炼的四种计费方式。它们的区别只有 Base URL 和 API Key 的类型，
-     * 协议都是 OpenAI 兼容，所以是一组同平台的路由预设。
+     * 支持的平台与各自的计费方式。同一平台下的 plan 区别只有 Base URL 和
+     * API Key 的类型，协议都是 OpenAI 兼容，所以是一组同平台的路由预设。
+     *
+     * `presetModels` 用于不提供 GET /models 列表的套餐入口（如 TokenHub
+     * Token Plan）：在线发现失败时回退到内置的当期套餐模型。
      */
-    const PLANS = [
+    const PLATFORMS = [
       {
         id: 'bailian',
-        api: 'openai-completions',
-        nameKey: 'nameMetered',
-        labelKey: 'planMetered',
-        hintKey: 'planMeteredHint',
-        keyHintKey: 'planMeteredKeyHint',
-        baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-        workspaceTemplate: 'https://{workspace}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
-        keyURL: 'https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key',
+        labelKey: 'platformBailian',
+        hintKey: 'platformBailianHint',
+        plans: [
+          {
+            id: 'bailian',
+            api: 'openai-completions',
+            nameKey: 'nameMetered',
+            labelKey: 'planMetered',
+            hintKey: 'planMeteredHint',
+            keyHintKey: 'planMeteredKeyHint',
+            baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+            workspaceTemplate: 'https://{workspace}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
+            keyURL: 'https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key',
+          },
+          {
+            id: 'bailian-coding',
+            api: 'openai-completions',
+            nameKey: 'nameCoding',
+            labelKey: 'planCoding',
+            hintKey: 'planCodingHint',
+            keyHintKey: 'planCodingKeyHint',
+            baseURL: 'https://coding.dashscope.aliyuncs.com/v1',
+            keyURL: 'https://bailian.console.aliyun.com/cn-beijing/subscription/coding-plan',
+          },
+          {
+            id: 'bailian-tpp',
+            api: 'openai-completions',
+            nameKey: 'nameTpp',
+            labelKey: 'planTpp',
+            hintKey: 'planTppHint',
+            keyHintKey: 'planTppKeyHint',
+            baseURL: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
+            keyURL: 'https://bailian.console.aliyun.com/cn-beijing/subscription/token-plan/personal',
+          },
+          {
+            id: 'bailian-tp',
+            api: 'openai-completions',
+            nameKey: 'nameTp',
+            labelKey: 'planTp',
+            hintKey: 'planTpHint',
+            keyHintKey: 'planTpKeyHint',
+            baseURL: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
+            keyURL: 'https://bailian.console.aliyun.com/cn-beijing/subscription/overview',
+          },
+        ],
       },
       {
-        id: 'bailian-coding',
-        api: 'openai-completions',
-        nameKey: 'nameCoding',
-        labelKey: 'planCoding',
-        hintKey: 'planCodingHint',
-        keyHintKey: 'planCodingKeyHint',
-        baseURL: 'https://coding.dashscope.aliyuncs.com/v1',
-        keyURL: 'https://bailian.console.aliyun.com/cn-beijing/subscription/coding-plan',
+        id: 'siliconflow',
+        labelKey: 'platformSiliconflow',
+        hintKey: 'platformSiliconflowHint',
+        plans: [
+          {
+            id: 'siliconflow',
+            api: 'openai-completions',
+            nameKey: 'nameSiliconflow',
+            labelKey: 'planSfMetered',
+            hintKey: 'planSfMeteredHint',
+            keyHintKey: 'planSfMeteredKeyHint',
+            baseURL: 'https://api.siliconflow.cn/v1',
+            keyURL: 'https://cloud.siliconflow.cn/account/ak',
+          },
+        ],
       },
       {
-        id: 'bailian-tpp',
-        api: 'openai-completions',
-        nameKey: 'nameTpp',
-        labelKey: 'planTpp',
-        hintKey: 'planTppHint',
-        keyHintKey: 'planTppKeyHint',
-        baseURL: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
-        keyURL: 'https://bailian.console.aliyun.com/cn-beijing/subscription/token-plan/personal',
+        id: 'tokenhub',
+        labelKey: 'platformTokenhub',
+        hintKey: 'platformTokenhubHint',
+        plans: [
+          {
+            id: 'tokenhub',
+            api: 'openai-completions',
+            nameKey: 'nameTokenhub',
+            labelKey: 'planThMetered',
+            hintKey: 'planThMeteredHint',
+            keyHintKey: 'planThMeteredKeyHint',
+            baseURL: 'https://tokenhub.tencentmaas.com/v1',
+            keyURL: 'https://console.cloud.tencent.com/tokenhub/apikey',
+          },
+          {
+            id: 'tokenhub-plan',
+            api: 'openai-completions',
+            nameKey: 'nameTokenhubPlan',
+            labelKey: 'planThPlan',
+            hintKey: 'planThPlanHint',
+            keyHintKey: 'planThPlanKeyHint',
+            baseURL: 'https://tokenhub.tencentmaas.com/plan/v3',
+            keyURL: 'https://console.cloud.tencent.com/tokenhub/tokenplan',
+            // 套餐入口没有 GET /models（实测 404），内置官方当期套餐模型。
+            // 模型库动态更新，以控制台为准；列表来自官方套餐概览文档。
+            presetModels: [
+              { id: 'tc-code-latest', name: 'Auto (smart routing)' },
+              { id: 'deepseek-v4.1-flash-1017', name: 'DeepSeek-V4.1-Flash-1017' },
+              { id: 'deepseek-v4-pro-0813', name: 'DeepSeek-V4-Pro-0813' },
+              { id: 'deepseek/deepseek-flash', name: 'DeepSeek-V4.1-Flash (vendor-direct)' },
+              { id: 'deepseek-v4-flash-202605', name: 'DeepSeek-V4-Flash (vendor-direct)' },
+              { id: 'deepseek-v4-pro-202606', name: 'DeepSeek-V4-Pro (vendor-direct)' },
+              { id: 'hy4-flash', name: 'Hy4 flash' },
+              { id: 'hy4', name: 'Hy4' },
+              { id: 'minimax-m3', name: 'MiniMax-M3' },
+              { id: 'glm-5.3', name: 'GLM-5.3' },
+              { id: 'glm-5.3-flash', name: 'GLM-5.3-Flash' },
+              { id: 'glm-5.2', name: 'GLM-5.2' },
+              { id: 'kimi-k2.7-code', name: 'Kimi K2.7 Code' },
+              { id: 'kimi-k3', name: 'Kimi K3' },
+              { id: 'mimo-v2.6-flash', name: 'MiMo-V2.6-Flash' },
+            ],
+          },
+        ],
       },
       {
-        id: 'bailian-tp',
-        api: 'openai-completions',
-        nameKey: 'nameTp',
-        labelKey: 'planTp',
-        hintKey: 'planTpHint',
-        keyHintKey: 'planTpKeyHint',
-        baseURL: 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
-        keyURL: 'https://bailian.console.aliyun.com/cn-beijing/subscription/overview',
+        id: 'ark',
+        labelKey: 'platformArk',
+        hintKey: 'platformArkHint',
+        plans: [
+          {
+            id: 'ark',
+            api: 'openai-completions',
+            nameKey: 'nameArk',
+            labelKey: 'planArkMetered',
+            hintKey: 'planArkMeteredHint',
+            keyHintKey: 'planArkMeteredKeyHint',
+            baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
+            keyURL: 'https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey',
+          },
+          {
+            id: 'ark-coding',
+            api: 'openai-completions',
+            nameKey: 'nameArkCoding',
+            labelKey: 'planArkCoding',
+            hintKey: 'planArkCodingHint',
+            keyHintKey: 'planArkCodingKeyHint',
+            baseURL: 'https://ark.cn-beijing.volces.com/api/coding/v3',
+            keyURL: 'https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey',
+          },
+        ],
       },
     ]
+
+    /** Flat plan list, kept for lookups by plan id. */
+    const PLANS = PLATFORMS.flatMap((platform) => platform.plans)
 
     /**
      * Resolve the endpoint of a plan.
@@ -109,7 +212,7 @@ window.__ModuleLoader__.load({
 
     const ZH = {
       cardTitle: '从其他平台导入模型',
-      cardDesc: '用图形化向导连接第三方平台，挑选模型后写入当前 profile 的提供商配置。首期支持阿里百炼。',
+      cardDesc: '用图形化向导连接第三方平台，挑选模型后写入当前 profile 的提供商配置。支持阿里百炼、硅基流动、腾讯云 TokenHub 与火山引擎方舟。',
       open: '开始导入',
       wizardTitle: '导入第三方平台模型',
       stepConnect: '连接平台',
@@ -117,6 +220,12 @@ window.__ModuleLoader__.load({
       platform: '平台',
       platformBailian: '阿里百炼 DashScope',
       platformBailianHint: '四种计费方式都是 OpenAI 兼容协议，只是地址与密钥不同。',
+      platformSiliconflow: '硅基流动 SiliconFlow',
+      platformSiliconflowHint: '一个 API Key 调用模型广场中的开源与商业模型，OpenAI 兼容协议。',
+      platformTokenhub: '腾讯云 TokenHub',
+      platformTokenhubHint: '按量计费与 Token Plan 套餐两种入口，均为 OpenAI 兼容协议。',
+      platformArk: '火山引擎方舟',
+      platformArkHint: '按量计费与 Coding Plan 两种入口，OpenAI 兼容协议。',
       plan: '计费方式',
       planMetered: '按量计费',
       planMeteredHint: '控制台的普通 API Key（sk- 开头）。',
@@ -130,6 +239,21 @@ window.__ModuleLoader__.load({
       planCodingKeyHint: 'Coding Plan 专属 API Key。',
       planTppKeyHint: 'Token Plan 个人版密钥，sk-sp- 开头。',
       planTpKeyHint: 'Token Plan 团队版专属 Key。',
+      planSfMetered: '按量计费',
+      planSfMeteredHint: '硅基流动统一 API Key，可调用模型广场中的模型。',
+      planSfMeteredKeyHint: '硅基流动 API Key，sk- 开头。',
+      planThMetered: '按量计费',
+      planThMeteredHint: 'TokenHub 控制台创建的 API Key，按 token 用量计费。',
+      planThMeteredKeyHint: 'TokenHub 按量计费 API Key。',
+      planThPlan: 'Token Plan 套餐',
+      planThPlanHint: '包月套餐（通用/Hy），接口不提供模型列表，已内置当期套餐模型。',
+      planThPlanKeyHint: 'Token Plan 密钥，sk-tp- 开头，通用与 Hy 套餐共用。',
+      planArkMetered: '按量计费',
+      planArkMeteredHint: '方舟 API Key，模型可填模型名或 ep- 接入点。',
+      planArkMeteredKeyHint: '火山方舟 API Key。',
+      planArkCoding: 'Coding Plan',
+      planArkCodingHint: '方舟 Coding Plan 订阅专属入口。',
+      planArkCodingKeyHint: 'Coding Plan 专属 API Key。',
       workspace: 'Workspace ID',
       workspacePlaceholder: 'ws-...（可省略 ws- 前缀）',
       workspaceHint: '填写后走专属域名；留空则用公共域名。改写 Workspace ID 会覆盖下面的 Base URL。',
@@ -137,8 +261,13 @@ window.__ModuleLoader__.load({
       nameCoding: '阿里百炼 · Coding Plan',
       nameTpp: '阿里百炼 · Token Plan 个人版',
       nameTp: '阿里百炼 · Token Plan 团队版',
+      nameSiliconflow: '硅基流动',
+      nameTokenhub: '腾讯云 TokenHub · 按量计费',
+      nameTokenhubPlan: '腾讯云 TokenHub · Token Plan',
+      nameArk: '火山引擎方舟',
+      nameArkCoding: '火山引擎方舟 · Coding Plan',
       baseURL: '接口地址（Base URL）',
-      baseURLHint: '通常以 /compatible-mode/v1 结尾，可直接改成私有部署地址。',
+      baseURLHint: '可直接改成私有部署或自定义接入点地址。',
       apiKey: 'API Key',
       apiKeyPlaceholder: 'sk-...',
       apiKeyHint: '只写入本机凭据库，配置文件里仅保存引用名，不存明文。',
@@ -174,6 +303,7 @@ window.__ModuleLoader__.load({
       needKey: '请先填写 API Key。',
       needSelection: '请至少选择一个模型。',
       noModels: '这个接口没有返回任何模型，可以手动填写模型 ID。',
+      presetNotice: '该套餐接口不提供模型列表，已载入内置的套餐模型（以控制台实际可用为准）。',
       emptyFilter: '没有匹配的模型。',
       truncated: '仅显示前 {n} 个，请用搜索缩小范围。',
       readonly: '当前 profile 不允许写入配置。',
@@ -187,7 +317,7 @@ window.__ModuleLoader__.load({
 
     const EN = {
       cardTitle: 'Import models from another platform',
-      cardDesc: 'Connect a third-party platform with a graphical wizard and write the models you pick into this profile. Alibaba Bailian is supported first.',
+      cardDesc: 'Connect a third-party platform with a graphical wizard and write the models you pick into this profile. Supports Alibaba Bailian, SiliconFlow, Tencent Cloud TokenHub and Volcano Engine Ark.',
       open: 'Start import',
       wizardTitle: 'Import a platform\'s models',
       stepConnect: 'Connect',
@@ -195,6 +325,12 @@ window.__ModuleLoader__.load({
       platform: 'Platform',
       platformBailian: 'Alibaba Bailian (DashScope)',
       platformBailianHint: 'All four billing modes speak the same OpenAI-compatible protocol.',
+      platformSiliconflow: 'SiliconFlow',
+      platformSiliconflowHint: 'One API key for the open-source and commercial models in the model plaza; OpenAI-compatible.',
+      platformTokenhub: 'Tencent Cloud TokenHub',
+      platformTokenhubHint: 'Pay-as-you-go and Token Plan subscription entries, both OpenAI-compatible.',
+      platformArk: 'Volcano Engine Ark',
+      platformArkHint: 'Pay-as-you-go and Coding Plan entries, OpenAI-compatible.',
       plan: 'Billing mode',
       planMetered: 'Pay as you go',
       planMeteredHint: 'A regular console API key (starts with sk-).',
@@ -208,6 +344,21 @@ window.__ModuleLoader__.load({
       planCodingKeyHint: 'A Coding Plan key.',
       planTppKeyHint: 'A personal Token Plan key starting with sk-sp-.',
       planTpKeyHint: 'A team Token Plan key.',
+      planSfMetered: 'Pay as you go',
+      planSfMeteredHint: 'A unified SiliconFlow API key for the models in the model plaza.',
+      planSfMeteredKeyHint: 'A SiliconFlow API key starting with sk-.',
+      planThMetered: 'Pay as you go',
+      planThMeteredHint: 'An API key created in the TokenHub console, billed by token usage.',
+      planThMeteredKeyHint: 'A TokenHub pay-as-you-go API key.',
+      planThPlan: 'Token Plan subscription',
+      planThPlanHint: 'Monthly subscription (general/Hy). No model listing endpoint; built-in plan models are used.',
+      planThPlanKeyHint: 'A Token Plan key starting with sk-tp-, shared by general and Hy plans.',
+      planArkMetered: 'Pay as you go',
+      planArkMeteredHint: 'An Ark API key; use a model name or an ep- endpoint id.',
+      planArkMeteredKeyHint: 'A Volcano Ark API key.',
+      planArkCoding: 'Coding Plan',
+      planArkCodingHint: 'The dedicated entry for an Ark Coding Plan subscription.',
+      planArkCodingKeyHint: 'A Coding Plan API key.',
       workspace: 'Workspace ID',
       workspacePlaceholder: 'ws-... (the ws- prefix is optional)',
       workspaceHint: 'Use the dedicated host when set; otherwise the public host. Editing it rewrites the Base URL below.',
@@ -215,8 +366,13 @@ window.__ModuleLoader__.load({
       nameCoding: 'Alibaba Bailian · Coding Plan',
       nameTpp: 'Alibaba Bailian · Token Plan (personal)',
       nameTp: 'Alibaba Bailian · Token Plan (team)',
+      nameSiliconflow: 'SiliconFlow',
+      nameTokenhub: 'Tencent Cloud TokenHub · pay as you go',
+      nameTokenhubPlan: 'Tencent Cloud TokenHub · Token Plan',
+      nameArk: 'Volcano Engine Ark',
+      nameArkCoding: 'Volcano Engine Ark · Coding Plan',
       baseURL: 'Base URL',
-      baseURLHint: 'Usually ends with /compatible-mode/v1; a private deployment URL works too.',
+      baseURLHint: 'A private deployment or custom endpoint URL works too.',
       apiKey: 'API key',
       apiKeyPlaceholder: 'sk-...',
       apiKeyHint: 'Stored in the local credential store only; the profile keeps the reference name.',
@@ -252,6 +408,7 @@ window.__ModuleLoader__.load({
       needKey: 'Enter the API key first.',
       needSelection: 'Select at least one model.',
       noModels: 'The endpoint returned no models; you can enter model ids by hand.',
+      presetNotice: 'This subscription endpoint has no model listing; the built-in plan models are loaded (actual availability follows the console).',
       emptyFilter: 'No model matches.',
       truncated: 'Showing the first {n}; narrow it with search.',
       readonly: 'This profile does not accept writes.',
@@ -412,15 +569,17 @@ window.__ModuleLoader__.load({
     /** The wizard. Mounted only while open, so its state resets every time. */
     function Wizard(props) {
       const { ctx, t, onClose, onSaved } = props
-      const [planId, setPlanId] = useState(PLANS[0].id)
-      const plan = PLANS.find((entry) => entry.id === planId) || PLANS[0]
+      const [platformId, setPlatformId] = useState(PLATFORMS[0].id)
+      const platform = PLATFORMS.find((entry) => entry.id === platformId) || PLATFORMS[0]
+      const [planId, setPlanId] = useState(PLATFORMS[0].plans[0].id)
+      const plan = PLANS.find((entry) => entry.id === planId) || PLATFORMS[0].plans[0]
 
       const [workspace, setWorkspace] = useState('')
-      const [baseURL, setBaseURL] = useState(planBaseURL(PLANS[0], ''))
+      const [baseURL, setBaseURL] = useState(planBaseURL(PLATFORMS[0].plans[0], ''))
       const [apiKey, setApiKey] = useState('')
       const [routeId, setRouteId] = useState('')
       const [routeTouched, setRouteTouched] = useState(false)
-      const [displayName, setDisplayName] = useState(t(PLANS[0].nameKey))
+      const [displayName, setDisplayName] = useState(t(PLATFORMS[0].plans[0].nameKey))
       const [nameTouched, setNameTouched] = useState(false)
       const [providers, setProviders] = useState(null)
       const [writable, setWritable] = useState(true)
@@ -431,6 +590,7 @@ window.__ModuleLoader__.load({
       const bodyRef = useRef(null)
       const [discoverState, setDiscoverState] = useState('idle')
       const [discoverError, setDiscoverError] = useState('')
+      const [discoverNotice, setDiscoverNotice] = useState('')
       const [query, setQuery] = useState('')
       const [onlyChat, setOnlyChat] = useState(true)
 
@@ -483,12 +643,34 @@ window.__ModuleLoader__.load({
         if (list && typeof list.scrollIntoView === 'function') list.scrollIntoView({ block: 'nearest' })
       }, [discoverState])
 
+      /** Drop any discovered list when the endpoint changes. */
+      function resetDiscovery() {
+        setModels(null)
+        setSelection({})
+        setDiscoverState('idle')
+        setDiscoverError('')
+        setDiscoverNotice('')
+      }
+
+      /** Switching platform selects its first plan and re-derives defaults. */
+      function pickPlatform(nextPlatformId) {
+        const nextPlatform = PLATFORMS.find((entry) => entry.id === nextPlatformId) || PLATFORMS[0]
+        const nextPlan = nextPlatform.plans[0]
+        setPlatformId(nextPlatform.id)
+        setPlanId(nextPlan.id)
+        setWorkspace('')
+        setBaseURL(planBaseURL(nextPlan, ''))
+        if (!nameTouched) setDisplayName(t(nextPlan.nameKey))
+        resetDiscovery()
+      }
+
       /** Switching the billing mode re-derives the endpoint and the default name. */
       function pickPlan(nextId) {
-        const next = PLANS.find((entry) => entry.id === nextId) || PLANS[0]
+        const next = PLANS.find((entry) => entry.id === nextId) || PLATFORMS[0].plans[0]
         setPlanId(next.id)
         setBaseURL(planBaseURL(next, workspace))
         if (!nameTouched) setDisplayName(t(next.nameKey))
+        resetDiscovery()
       }
 
       /** The metered plan rewrites the endpoint while the workspace id changes. */
@@ -536,9 +718,20 @@ window.__ModuleLoader__.load({
         setSelection({})
       }
 
+      /** Load the plan's built-in models when the endpoint has no listing. */
+      function usePresetModels() {
+        const list = plan.presetModels.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))
+        setModels(list)
+        setSelection({})
+        setDiscoverState('ready')
+        setDiscoverError('')
+        setDiscoverNotice(t('presetNotice'))
+      }
+
       async function handleDiscover() {
         setSaveError('')
         setDiscoverError('')
+        setDiscoverNotice('')
         if (!apiKey.trim()) {
           setDiscoverError(t('needKey'))
           return
@@ -552,18 +745,28 @@ window.__ModuleLoader__.load({
           })
           if (res && res.ok === true) {
             const list = (res.value || []).slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))
+            if (list.length === 0 && plan.presetModels) {
+              usePresetModels()
+              return
+            }
             setModels(list)
             setSelection({})
             setDiscoverState('ready')
             if (list.length === 0) setDiscoverError(t('noModels'))
+          } else if (plan.presetModels) {
+            usePresetModels()
           } else {
             setModels(null)
             setDiscoverState('error')
             setDiscoverError((res && res.error && res.error.message) || t('unknownError'))
           }
         } catch (error) {
-          setDiscoverState('error')
-          setDiscoverError(String((error && error.message) || error))
+          if (plan.presetModels) {
+            usePresetModels()
+          } else {
+            setDiscoverState('error')
+            setDiscoverError(String((error && error.message) || error))
+          }
         }
       }
 
@@ -677,16 +880,18 @@ window.__ModuleLoader__.load({
           writable ? null : h('div', { className: 'dsh-mi-error' }, t('readonly')),
 
           h('div', { className: 'dsh-mi-grid' },
-            h(Field, { label: t('platform'), hint: t('platformBailianHint') },
+            h(Field, { label: t('platform'), hint: t(platform.hintKey) },
               h('select', {
-                className: 'dsh-mi-select', value: 'bailian', disabled: true,
-              }, h('option', { value: 'bailian' }, t('platformBailian'))),
+                className: 'dsh-mi-select', value: platform.id, 'data-field': 'platform',
+                onChange: (event) => pickPlatform(event.target.value),
+              }, PLATFORMS.map((entry) =>
+                h('option', { key: entry.id, value: entry.id }, t(entry.labelKey)))),
             ),
             h(Field, { label: t('plan'), hint: t(plan.hintKey) },
               h('select', {
                 className: 'dsh-mi-select', value: plan.id, 'data-field': 'plan',
                 onChange: (event) => pickPlan(event.target.value),
-              }, PLANS.map((entry) =>
+              }, platform.plans.map((entry) =>
                 h('option', { key: entry.id, value: entry.id }, t(entry.labelKey)))),
             ),
             plan.workspaceTemplate
@@ -772,6 +977,9 @@ window.__ModuleLoader__.load({
 
           discoverError
             ? h('div', { className: 'dsh-mi-error' }, discoverError)
+            : null,
+          discoverNotice
+            ? h('div', { className: 'dsh-mi-warn' }, discoverNotice)
             : null,
 
           models !== null

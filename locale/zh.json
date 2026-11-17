@@ -1,6 +1,1 @@
-{
-  "meta": {
-    "title": "模型导入器",
-    "description": "在设置 → 模型页用图形化向导连接第三方平台（阿里百炼：按量计费 / Coding Plan / Token Plan），挑选模型后写入当前 profile。"
-  }
-}
+{"meta": {"description": "在设置 → 模型页用图形化向导连接第三方平台（阿里百炼 / 硅基流动 / 腾讯云 TokenHub / 火山引擎方舟），挑选模型后写入当前 profile。", "title": "模型导入器"}}

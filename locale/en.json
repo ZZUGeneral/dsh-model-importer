@@ -1,6 +1,1 @@
-{
-  "meta": {
-    "title": "Model importer",
-    "description": "Add Alibaba Bailian models (pay-as-you-go, Coding Plan, Token Plan) to this profile through a graphical wizard on Settings → Models."
-  }
-}
+{"meta": {"description": "Add models from Alibaba Bailian, SiliconFlow, Tencent Cloud TokenHub and Volcano Ark to this profile through a graphical wizard on Settings → Models.", "title": "Model importer"}}

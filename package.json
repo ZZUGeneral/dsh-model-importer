@@ -1,7 +1,7 @@
 {
   "name": "dsh-model-importer",
-  "version": "0.2.4",
-  "description": "Graphical importer for third-party models: connects Alibaba Bailian (pay-as-you-go, Coding Plan, Token Plan) and writes the picked models into the profile.",
+  "version": "0.3.0",
+  "description": "Graphical importer for third-party models: connects Alibaba Bailian, SiliconFlow, Tencent Cloud TokenHub and Volcano Ark, then writes the picked models into the profile.",
   "type": "module",
   "license": "MIT",
   "main": "index.js",
@@ -45,6 +45,12 @@
     "bailian",
     "dashscope",
     "aliyun",
+    "siliconflow",
+    "tokenhub",
+    "tencent",
+    "volcano",
+    "ark",
+    "doubao",
     "model-import",
     "llm"
   ]
